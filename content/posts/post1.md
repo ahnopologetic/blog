@@ -1,7 +1,7 @@
 ---
-title: "Blog Title"
+title: "First Post"
 date: "2024-11-16"
-description: "Short description of the blog"
+description: "My first post"
 slug: "post1"
 ---
 Content in markdown...
