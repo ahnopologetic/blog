@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 type PostMetadata = {
   title: string;
-  date: string;
+  date: Date;
   description: string;
   slug: string;
 };
@@ -21,7 +21,7 @@ async function getPosts(): Promise<PostMetadata[]> {
       title: data.title,
       date: data.date,
       description: data.description,
-      slug: file.replace('.md', ''),
+      slug: data.slug,
     };
   });
 }
@@ -40,7 +40,7 @@ export default async function BlogPage() {
             <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:underline">
               {post.title}
             </Link>
-            <p className="text-sm text-gray-600 italic">{post.date}</p>
+            <p className="text-sm text-gray-600 italic">{post.date.toLocaleDateString()}</p>
           </li>
         ))}
       </ul>

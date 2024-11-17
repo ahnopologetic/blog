@@ -1,11 +1,11 @@
 const SEO = {
-    title: 'My Blog',
-    description: 'A minimalist blog built with Next.js and TypeScript.',
+    title: 'ahnopologetic blog',
+    description: 'IMHO, my worldview, and a few other things',
     openGraph: {
       type: 'website',
       locale: 'en_US',
-      url: 'https://yourdomain.com/',
-      site_name: 'My Blog',
+      url: 'https://blog.ahnopologetic.xyz',
+      site_name: 'ahnopologetic blog',
     },
   };
   

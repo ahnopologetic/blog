@@ -50,7 +50,7 @@ const Cheltenham = localFont({
 
 
 export const metadata: Metadata = {
-  title: "Ahnopologetic Blog",
+  title: "ahnopologetic Blog",
   description: "IMHO, my worldview, and a few other things",
 };
 

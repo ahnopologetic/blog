@@ -19,9 +19,9 @@ async function getLatestPosts(): Promise<PostMetadata[]> {
     const { data } = matter(content);
     return {
       title: data.title,
-      date: data.date,
+      date: new Date(data.date),
       description: data.description,
-      slug: file.replace('.md', ''),
+      slug: data.slug,
     };
   });
 
@@ -77,7 +77,7 @@ export default async function Home() {
                 <h3 className="text-2xl font-bold group-hover:text-blue-600 transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-sm text-gray-600 mt-2">{post.date}</p>
+                <p className="text-sm text-gray-600 mt-2">{post.date.toLocaleDateString()}</p>
                 <p className="text-gray-600 mt-2">{post.description}</p>
               </Link>
             </article>
