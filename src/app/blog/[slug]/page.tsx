@@ -1,8 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { remark } from 'remark';
-import html from 'remark-html';
+import remarkParse from 'remark-parse';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify';
+import { unified } from 'unified';
 
 type PostProps = {
   params: { slug: string };
@@ -21,7 +26,16 @@ async function getPost(slug: string) {
   const filePath = path.join(process.cwd(), 'content/posts', `${slug}.md`);
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const { data, content } = matter(fileContent);
-  const processedContent = await remark().use(html).process(content);
+  
+  const processedContent = await unified()
+    .use(remarkParse)
+    .use(remarkBreaks)
+    .use(remarkGfm)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
+    .use(rehypeStringify)
+    .process(content);
+    
   const contentHtml = processedContent.toString();
 
   return { data, contentHtml };
@@ -34,7 +48,10 @@ export default async function BlogPost({ params }: PostProps) {
     <div className="max-w-screen-md mx-auto p-4">
       <h1 className="text-3xl font-bold">{data.title}</h1>
       <p className="text-sm text-gray-600">{data.date}</p>
-      <article dangerouslySetInnerHTML={{ __html: contentHtml }} className="mt-4" />
+      <article 
+        dangerouslySetInnerHTML={{ __html: contentHtml }} 
+        className="mt-4 prose prose-slate max-w-none text-foreground"
+      />
     </div>
   );
 }

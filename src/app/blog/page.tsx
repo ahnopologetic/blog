@@ -31,7 +31,9 @@ export default async function BlogPage() {
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Blog</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        Blog
+      </h1>
       <ul>
         {posts.map((post) => (
           <li key={post.slug} className="mb-4">
