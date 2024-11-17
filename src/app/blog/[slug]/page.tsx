@@ -60,11 +60,11 @@ export default async function BlogPost({ params }: PostProps) {
     <div className="max-w-screen-md mx-auto p-4">
       <h1 className="text-[3rem] font-bold italic">{data.title}</h1>
       <h3 className="text-[2rem]">{data.description}</h3>
-      <p className="text-sm text-gray-600">{data.date}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{data.date}</p>
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>
       <article 
         dangerouslySetInnerHTML={{ __html: contentHtml }} 
-        className="mt-4 prose prose-gray dark:prose-invert max-w-none text-foreground text-white
+        className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
           prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:my-8"
       />
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>

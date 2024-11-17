@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 
+// Correct type definition for the route handler params
+type RouteParams = {
+  params: Promise<{
+    path: string[]
+  }>
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: RouteParams
 ) {
   try {
-    const imagePath = join(process.cwd(), 'content/images', ...params.path);
+    const imagePath = join(process.cwd(), 'content/images', ...(await params).path);
     const imageBuffer = await readFile(imagePath);
     
     // Determine content-type based on file extension
@@ -24,7 +31,7 @@ export async function GET(
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
-  } catch (e) {
+  } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
     return new NextResponse('Image not found', { status: 404 });
   }
 } 
