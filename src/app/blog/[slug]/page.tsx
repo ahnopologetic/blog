@@ -1,16 +1,16 @@
 import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
-import remarkParse from 'remark-parse';
-import remarkBreaks from 'remark-breaks';
-import remarkGfm from 'remark-gfm';
-import remarkRehype from 'remark-rehype';
+import path from 'path';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 
 type PostProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
@@ -42,10 +42,10 @@ async function getPost(slug: string) {
 }
 
 export default async function BlogPost({ params }: PostProps) {
-  const { data, contentHtml } = await getPost(params.slug);
+  const { data, contentHtml } = await getPost((await params).slug);
 
   return (
-    <div className="max-w-screen-md mx-auto p-4 my-8">
+    <div className="max-w-screen-md mx-auto p-4">
       <h1 className="text-3xl font-extrabold italic">{data.title}</h1>
       <p className="text-sm text-gray-600">{data.date}</p>
       <article 
