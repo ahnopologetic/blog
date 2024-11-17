@@ -46,7 +46,7 @@ export default async function BlogPost({ params }: PostProps) {
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <h1 className="text-3xl font-bold">{data.title}</h1>
+      <h1 className="text-3xl font-extrabold italic">{data.title}</h1>
       <p className="text-sm text-gray-600">{data.date}</p>
       <article 
         dangerouslySetInnerHTML={{ __html: contentHtml }} 

@@ -2,16 +2,52 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const Cheltenham = localFont({
+  src: [
+    {
+      path: './fonts/CheltenhamStdLight.woff',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: './fonts/CheltenhamStdLightItalic.woff',
+      weight: '300',
+      style: 'italic',
+    },
+    {
+      path: './fonts/CheltenhamStdBook.woff',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './fonts/CheltenhamStdBookItalic.woff', 
+      weight: '400',
+      style: 'italic',
+    },
+    {
+      path: './fonts/CheltenhamStdBold.woff',
+      weight: '700', 
+      style: 'normal',
+    },
+    {
+      path: './fonts/CheltenhamStdBoldItalic.woff',
+      weight: '700',
+      style: 'italic',
+    },
+    {
+      path: './fonts/CheltenhamStdUltra.woff',
+      weight: '900',
+      style: 'normal',
+    },
+    {
+      path: './fonts/CheltenhamStdUltraItalic.woff',
+      weight: '900',
+      style: 'italic',
+    }
+  ],
+  variable: '--font-cheltenham',
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${Cheltenham.variable} antialiased`}
       >
         {children}
       </body>
