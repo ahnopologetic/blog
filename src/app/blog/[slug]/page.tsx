@@ -46,12 +46,29 @@ export default async function BlogPost({ params }: PostProps) {
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <h1 className="text-3xl font-extrabold italic">{data.title}</h1>
+      <h1 className="text-[3rem] font-bold italic">{data.title}</h1>
+      <h3 className="text-[2rem]">{data.description}</h3>
       <p className="text-sm text-gray-600">{data.date}</p>
+      <div className="h-[1px] w-full bg-gray-200 my-8"></div>
       <article 
         dangerouslySetInnerHTML={{ __html: contentHtml }} 
         className="mt-4 prose prose-slate max-w-none text-foreground"
       />
+      <div className="h-[1px] w-full bg-gray-200 my-8"></div>
+      <div className="flex gap-4 justify-center">
+        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
+          <span className="text-2xl">👍</span>
+          <span className="text-sm text-gray-600">Like</span>
+        </button>
+        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
+          <span className="text-2xl">😐</span>
+          <span className="text-sm text-gray-600">Meh</span>
+        </button>
+        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
+          <span className="text-2xl">👎</span>
+          <span className="text-sm text-gray-600">Dislike</span>
+        </button>
+      </div>
     </div>
   );
 }
