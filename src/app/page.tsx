@@ -5,7 +5,7 @@ import matter from 'gray-matter';
 
 type PostMetadata = {
   title: string;
-  date: string;
+  date: Date;
   description: string;
   slug: string;
 };
@@ -24,9 +24,7 @@ async function getLatestPosts(): Promise<PostMetadata[]> {
       slug: data.slug,
     };
   });
-
-  // Sort by date descending
-  return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return posts.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 export default async function Home() {
