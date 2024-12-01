@@ -9,6 +9,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
+import { ShareMenu } from '@/components/ShareMenu';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -58,10 +59,19 @@ export default async function BlogPost({ params }: PostProps) {
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
-      <h1 className="text-[3rem] font-semibold italic">{data.title}</h1>
-      <h3 className="text-[1.5rem] mb-4 leading-6">{data.description}</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{new Date(data.date).toLocaleDateString()}</p>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h1 className="text-[3rem] font-semibold italic">{data.title}</h1>
+          <h3 className="text-[1.5rem] mb-4 leading-6">{data.description}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {new Date(data.date).toLocaleDateString()}
+          </p>
+        </div>
+        <ShareMenu title={data.title} />
+      </div>
+      
       <div className="h-[1px] w-full bg-gray-200 my-4"></div>
+      
       <article 
         dangerouslySetInnerHTML={{ __html: contentHtml }} 
         className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
