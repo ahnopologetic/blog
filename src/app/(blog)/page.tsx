@@ -37,7 +37,7 @@ export default async function BlogPage() {
       <ul>
         {posts.map((post) => (
           <li key={post.slug} className="mb-4">
-            <Link href={`/blog/${post.slug}`} className="text-blue-600 hover:underline">
+            <Link href={`/${post.slug}`} className="text-blue-600 hover:underline">
               {post.title}
             </Link>
             <p className="text-sm text-gray-600 italic">{post.date.toLocaleDateString()}</p>

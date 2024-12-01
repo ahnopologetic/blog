@@ -69,7 +69,7 @@ export default async function Home() {
           {latestPosts.map((post) => (
             <article key={post.slug} className="border-b border-gray-200 pb-8">
               <Link 
-                href={`/blog/${post.slug}`}
+                href={`/${post.slug}`}
                 className="group"
               >
                 <h3 className="text-2xl font-bold group-hover:text-blue-600 transition-colors">
@@ -83,7 +83,7 @@ export default async function Home() {
         </div>
         <div className="mt-12 text-center">
           <Link 
-            href="/blog" 
+            href="/" 
             className="inline-block px-6 py-3 border border-current rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             View All Posts
