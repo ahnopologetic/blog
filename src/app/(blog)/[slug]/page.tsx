@@ -10,6 +10,7 @@ import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
 import { ShareMenu } from '@/components/ShareMenu';
+import PostComment from '@/components/post/post-comment';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -32,7 +33,7 @@ async function getPost(slug: string) {
     '![]($1)'
   );
   const { data, content } = matter(processedContent);
-  
+
   const processedHtml = await unified()
     .use(remarkParse)
     .use(remarkBreaks)
@@ -48,7 +49,7 @@ async function getPost(slug: string) {
     .use(rehypeRaw)
     .use(rehypeStringify)
     .process(content);
-    
+
   const contentHtml = processedHtml.toString();
 
   return { data, contentHtml };
@@ -56,6 +57,19 @@ async function getPost(slug: string) {
 
 export default async function BlogPost({ params }: PostProps) {
   const { data, contentHtml } = await getPost((await params).slug);
+
+  const comments = [
+    {
+      id: 1,
+      author: {
+        name: 'John Doe',
+        image: 'https://github.com/shadcn.png',
+      },
+      content: 'This is a comment',
+      date: new Date(),
+      likes: 0,
+    },
+  ]; // TODO: get comments from database
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
@@ -69,16 +83,16 @@ export default async function BlogPost({ params }: PostProps) {
         </div>
         <ShareMenu title={data.title} />
       </div>
-      
+
       <div className="h-[1px] w-full bg-gray-200 my-4"></div>
-      
-      <article 
-        dangerouslySetInnerHTML={{ __html: contentHtml }} 
+
+      <article
+        dangerouslySetInnerHTML={{ __html: contentHtml }}
         className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
           prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:my-8"
       />
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>
-      <div className="flex gap-4 justify-center">
+      {/* <div className="flex gap-4 justify-center">
         <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
           <span className="text-2xl">👍</span>
           <span className="text-sm text-gray-600">Like</span>
@@ -91,6 +105,23 @@ export default async function BlogPost({ params }: PostProps) {
           <span className="text-2xl">👎</span>
           <span className="text-sm text-gray-600">Dislike</span>
         </button>
+      </div> */}
+
+      <div className="flex gap-4 justify-center">
+        {comments.map(({ id, author, content, date, likes }) => (
+          <PostComment
+            key={id}
+            author={author}
+            content={content}
+            createdAt={date}
+            likes={likes}
+            isAuthor={false}
+            onLike={() => {
+              console.log('like'); // TODO: add like to database
+            }}
+            commentId={id.toString()}
+          />
+        ))}
       </div>
     </div>
   );
