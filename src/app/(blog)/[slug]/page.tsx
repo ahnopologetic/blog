@@ -10,6 +10,11 @@ import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
 import { ShareMenu } from '@/components/ShareMenu';
+import PostComment from '@/components/post/post-comment';
+import PostCommentInput from '@/components/post/post-comment-input';
+import { createClient } from '@/utils/supabase/client';
+import { createClient as createServerClient } from '@/utils/supabase/server';
+import { revalidatePath } from 'next/cache';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -32,7 +37,7 @@ async function getPost(slug: string) {
     '![]($1)'
   );
   const { data, content } = matter(processedContent);
-  
+
   const processedHtml = await unified()
     .use(remarkParse)
     .use(remarkBreaks)
@@ -48,14 +53,56 @@ async function getPost(slug: string) {
     .use(rehypeRaw)
     .use(rehypeStringify)
     .process(content);
-    
+
   const contentHtml = processedHtml.toString();
 
   return { data, contentHtml };
 }
 
+async function getComments(slug: string) {
+  const supabase = createClient();
+  const { data: comments, error } = await supabase
+    .from('comments')
+    .select(`
+      *,
+      comment_likes (
+        user_id
+      ),
+      replies:comments (
+        *,
+        comment_likes (
+          user_id
+        )
+      )
+    `)
+    .eq('post_slug', slug)
+    .is('parent_id', null)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching comments:', error);
+    return [];
+  }
+
+  return comments;
+}
+
 export default async function BlogPost({ params }: PostProps) {
   const { data, contentHtml } = await getPost((await params).slug);
+  const comments = await getComments((await params).slug);
+
+  const transformComment = (comment: any) => ({
+    commentId: comment.id,
+    author: {
+      name: comment.user_id,
+      image: "https://github.com/shadcn.png"
+    },
+    content: comment.content,
+    createdAt: new Date(comment.created_at),
+    likes: comment.likes,
+    isLiked: comment.comment_likes?.some((like: any) => like.user_id === 'guest'),
+    replies: comment.replies?.map(transformComment) || []
+  });
 
   return (
     <div className="max-w-screen-md mx-auto p-4">
@@ -69,28 +116,100 @@ export default async function BlogPost({ params }: PostProps) {
         </div>
         <ShareMenu title={data.title} />
       </div>
-      
+
       <div className="h-[1px] w-full bg-gray-200 my-4"></div>
-      
-      <article 
-        dangerouslySetInnerHTML={{ __html: contentHtml }} 
+
+      <article
+        dangerouslySetInnerHTML={{ __html: contentHtml }}
         className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
           prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:my-8"
       />
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>
-      <div className="flex gap-4 justify-center">
-        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
-          <span className="text-2xl">👍</span>
-          <span className="text-sm text-gray-600">Like</span>
-        </button>
-        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
-          <span className="text-2xl">😐</span>
-          <span className="text-sm text-gray-600">Meh</span>
-        </button>
-        <button className="flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-colors">
-          <span className="text-2xl">👎</span>
-          <span className="text-sm text-gray-600">Dislike</span>
-        </button>
+
+      <div className="flex flex-col gap-4">
+        <PostCommentInput
+          user={{
+            name: "Guest User",
+            image: "https://github.com/shadcn.png"
+          }}
+          onSubmit={async (content) => {
+            'use server';
+            const supabase = await createServerClient();
+            const { error } = await supabase
+              .from('comments')
+              .insert({
+                content,
+                post_slug: (await params).slug,
+                user_id: 'guest',
+                likes: 0,
+                parent_id: null
+              });
+
+            if (error) {
+              console.error('Error adding comment:', error);
+            }
+
+            revalidatePath(`/blog/${(await params).slug}`);
+          }}
+        />
+        {comments.map((comment) => {
+          const transformedComment = transformComment(comment);
+          return (
+            <PostComment
+              key={transformedComment.commentId}
+              {...transformedComment}
+              onLike={async (commentId) => {
+                'use server';
+                const supabase = await createServerClient();
+                
+                // update comment likes count
+                const { error: updateError } = await supabase
+                  .from('comments')
+                  .update({
+                    likes: comment.likes + 1
+                  })
+                  .eq('id', commentId);
+
+                if (updateError) {
+                  console.error('Error updating comment likes:', updateError);
+                }
+
+                // toggle like
+                const { error: toggleError } = await supabase
+                  .from('comment_likes')
+                  .upsert({
+                    comment_id: commentId,
+                    user_id: 'guest',
+                  });
+
+                if (toggleError) {
+                  console.error('Error toggling like:', toggleError);
+                }
+
+                revalidatePath(`/blog/${(await params).slug}`);
+              }}
+              onReply={async (content, parentId) => {
+                'use server';
+                const supabase = await createServerClient();
+                const { error } = await supabase
+                  .from('comments')
+                  .insert({
+                    content,
+                    post_slug: (await params).slug,
+                    user_id: 'guest',
+                    likes: 0,
+                    parent_id: parentId
+                  });
+
+                if (error) {
+                  console.error('Error adding reply:', error);
+                }
+
+                revalidatePath(`/blog/${(await params).slug}`);
+              }}
+            />
+          );
+        })}
       </div>
     </div>
   );
