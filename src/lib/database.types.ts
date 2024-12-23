@@ -7,51 +7,64 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
-      comment_likes: {
+      comments: {
         Row: {
-          comment_id: string
-          created_at: string
           id: string
+          content: string
+          created_at: string
           user_id: string
+          post_slug: string
+          likes: number
+          parent_id: string | null
         }
         Insert: {
-          comment_id: string
-          created_at?: string
           id?: string
+          content: string
+          created_at?: string
           user_id: string
+          post_slug: string
+          likes?: number
+          parent_id?: string | null
         }
         Update: {
-          comment_id?: string
-          created_at?: string
           id?: string
+          content?: string
+          created_at?: string
           user_id?: string
+          post_slug?: string
+          likes?: number
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      comment_likes: {
+        Row: {
+          id: string
+          comment_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          comment_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          comment_id?: string
+          user_id?: string
+          created_at?: string
         }
         Relationships: [
           {
@@ -60,35 +73,8 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "comments"
             referencedColumns: ["id"]
-          },
+          }
         ]
-      }
-      comments: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          likes: number
-          post_slug: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          likes?: number
-          post_slug: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          likes?: number
-          post_slug?: string
-          user_id?: string
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -98,9 +84,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
       [_ in never]: never
     }
   }
