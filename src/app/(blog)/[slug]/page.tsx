@@ -11,6 +11,7 @@ import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
 import { ShareMenu } from '@/components/ShareMenu';
 import PostComment from '@/components/post/post-comment';
+import PostCommentInput from '@/components/post/post-comment-input';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -107,7 +108,13 @@ export default async function BlogPost({ params }: PostProps) {
         </button>
       </div> */}
 
-      <div className="flex gap-4 justify-center">
+      <div className="flex flex-col gap-4">
+        <PostCommentInput 
+          user={{
+            name: "Guest User",
+            image: "https://github.com/shadcn.png" // TODO: Replace with actual user image
+          }}
+        />
         {comments.map(({ id, author, content, date, likes }) => (
           <PostComment
             key={id}
@@ -116,9 +123,6 @@ export default async function BlogPost({ params }: PostProps) {
             createdAt={date}
             likes={likes}
             isAuthor={false}
-            onLike={() => {
-              console.log('like'); // TODO: add like to database
-            }}
             commentId={id.toString()}
           />
         ))}
