@@ -158,7 +158,7 @@ export default async function BlogPost({ params }: PostProps) {
         className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
           prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:max-h-[500px] prose-img:my-2"
       />
-      <div className="mt-8">
+      <div className="my-8">
         <PostReactions postSlug={slug} />
       </div>
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>

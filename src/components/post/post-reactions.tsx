@@ -36,7 +36,25 @@ function getOrCreateUserId() {
 export function PostReactions({ postSlug }: PostReactionsProps) {
   const [reactionCounts, setReactionCounts] = useState<ReactionCount[]>([]);
   const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [isFloating, setIsFloating] = useState(true);
   const supabase = createClient();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+      
+      // Show floating panel if not near bottom (500px threshold)
+      setIsFloating(distanceFromBottom > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const fetchReactions = async () => {
     const userId = getOrCreateUserId();
@@ -135,8 +153,8 @@ export function PostReactions({ postSlug }: PostReactionsProps) {
     };
   }, [postSlug]);
 
-  return (
-    <div className="flex gap-2 items-center justify-center">
+  const ReactionButtons = () => (
+    <div className={`flex gap-2 items-center justify-center ${isFloating ? "flex-col" : ""}`}>
       {REACTIONS.map(({ emoji, name }) => {
         const count = reactionCounts.find(r => r.reaction_type === name)?.count || 0;
         const isReacted = userReactions.includes(name);
@@ -144,8 +162,10 @@ export function PostReactions({ postSlug }: PostReactionsProps) {
           <Button
             key={name}
             variant={isReacted ? "default" : "outline"}
-            size="lg"
-            className="flex items-center gap-4 text-md relative overflow-hidden"
+            size={isFloating ? "sm" : "lg"}
+            className={`flex items-center gap-2 relative overflow-hidden ${
+              isFloating ? "flex" : "gap-4 text-md"
+            }`}
             onClick={() => addReaction(name)}
           >
             <span>{emoji}</span>
@@ -156,6 +176,7 @@ export function PostReactions({ postSlug }: PostReactionsProps) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -20, opacity: 0 }}
                 transition={{ duration: 0.2 }}
+                className={isFloating ? "text-xs" : ""}
               >
                 {count}
               </motion.span>
@@ -164,5 +185,28 @@ export function PostReactions({ postSlug }: PostReactionsProps) {
         );
       })}
     </div>
+  );
+
+  return (
+    <>
+      {/* Floating panel */}
+      <AnimatePresence>
+        {isFloating && (
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            className="fixed right-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm border rounded-lg p-2 shadow-lg hidden md:block"
+          >
+            <ReactionButtons />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom panel */}
+      <div className={`${isFloating ? 'md:opacity-0' : ''}`}>
+        <ReactionButtons />
+      </div>
+    </>
   );
 } 
