@@ -15,6 +15,8 @@ import PostCommentInput from '@/components/post/post-comment-input';
 import { createClient } from '@/utils/supabase/client';
 import { createClient as createServerClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { notFound } from 'next/navigation';
+import { PostReactions } from '@/components/post/post-reactions';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -29,8 +31,36 @@ export async function generateStaticParams() {
   }));
 }
 
+async function findPostFileBySlug(slug: string): Promise<string | null> {
+  const postsDir = path.join(process.cwd(), 'content/posts');
+  const files = fs.readdirSync(postsDir);
+  
+  // First try exact match with .md extension
+  if (files.includes(`${slug}.md`)) {
+    return `${slug}.md`;
+  }
+  
+  // Then try to match the slug against frontmatter
+  for (const file of files) {
+    const filePath = path.join(postsDir, file);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const { data } = matter(content);
+    
+    if (data.slug === slug) {
+      return file;
+    }
+  }
+  
+  return null;
+}
+
 async function getPost(slug: string) {
-  const filePath = path.join(process.cwd(), 'content/posts', `${slug}.md`);
+  const fileName = await findPostFileBySlug(slug);
+  if (!fileName) {
+    throw new Error(`Post with slug "${slug}" not found`);
+  }
+
+  const filePath = path.join(process.cwd(), 'content/posts', fileName);
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const processedContent = fileContent.replace(
     /!\[\[(.*?)\]\]/g,
@@ -88,8 +118,12 @@ async function getComments(slug: string) {
 }
 
 export default async function BlogPost({ params }: PostProps) {
-  const { data, contentHtml } = await getPost((await params).slug);
-  const comments = await getComments((await params).slug);
+  const slug = (await params).slug;
+  const { data, contentHtml } = await getPost(slug);
+  if (!data) {
+    return notFound();
+  }
+  const comments = await getComments(slug);
 
   const transformComment = (comment: any) => ({
     commentId: comment.id,
@@ -108,8 +142,8 @@ export default async function BlogPost({ params }: PostProps) {
     <div className="max-w-screen-md mx-auto p-4">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h1 className="text-[3rem] font-semibold italic">{data.title}</h1>
-          <h3 className="text-[1.5rem] mb-4 leading-6">{data.description}</h3>
+          <h1 className="text-[3rem] font-semibold italic leading-none">{data.title}</h1>
+          <h3 className="text-[1.5rem] mt-2 mb-4 leading-6">{data.description}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {new Date(data.date).toLocaleDateString()}
           </p>
@@ -122,11 +156,14 @@ export default async function BlogPost({ params }: PostProps) {
       <article
         dangerouslySetInnerHTML={{ __html: contentHtml }}
         className="mt-4 prose prose-gray light:prose-invert dark:prose-invert max-w-none text-foreground dark:text-white
-          prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:my-8"
+          prose-img:rounded-lg prose-img:mx-auto prose-img:max-w-full prose-img:max-h-[500px] prose-img:my-2"
       />
+      <div className="mt-8">
+        <PostReactions postSlug={slug} />
+      </div>
       <div className="h-[1px] w-full bg-gray-200 my-8"></div>
-
-      <div className="flex flex-col gap-4">
+      {/* TODO: implement user auth */}
+      <div className="flex flex-col gap-4 hidden">
         <PostCommentInput
           user={{
             name: "Guest User",

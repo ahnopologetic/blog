@@ -7,64 +7,51 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      comments: {
-        Row: {
-          id: string
-          content: string
-          created_at: string
-          user_id: string
-          post_slug: string
-          likes: number
-          parent_id: string | null
-        }
-        Insert: {
-          id?: string
-          content: string
-          created_at?: string
-          user_id: string
-          post_slug: string
-          likes?: number
-          parent_id?: string | null
-        }
-        Update: {
-          id?: string
-          content?: string
-          created_at?: string
-          user_id?: string
-          post_slug?: string
-          likes?: number
-          parent_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comments_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       comment_likes: {
         Row: {
-          id: string
           comment_id: string
-          user_id: string
           created_at: string
+          id: string
+          user_id: string
         }
         Insert: {
-          id?: string
           comment_id: string
-          user_id: string
           created_at?: string
+          id?: string
+          user_id: string
         }
         Update: {
-          id?: string
           comment_id?: string
-          user_id?: string
           created_at?: string
+          id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -73,17 +60,89 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "comments"
             referencedColumns: ["id"]
-          }
+          },
         ]
+      }
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          likes: number
+          parent_id: string | null
+          post_slug: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          likes?: number
+          parent_id?: string | null
+          post_slug: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          likes?: number
+          parent_id?: string | null
+          post_slug?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          post_slug: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_slug: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_slug?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      post_reaction_summary: {
+        Row: {
+          count: number | null
+          post_slug: string | null
+          reaction_type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
       [_ in never]: never
     }
   }
@@ -185,4 +244,3 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
- 
