@@ -15,11 +15,32 @@ import PostCommentInput from '@/components/post/post-comment-input';
 import { createClient } from '@/utils/supabase/client';
 import { createClient as createServerClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { PostReactions } from '@/components/post/post-reactions';
+import { Database } from '@/lib/database.types';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
+};
+
+type CommentLike = Database['public']['Tables']['comment_likes']['Row'];
+
+type Comment = Database['public']['Tables']['comments']['Row'] & {
+  replies: Comment[];
+  comment_likes: CommentLike[];
+};
+
+type CommentData = {
+  commentId: string;
+  author: {
+    name: string;
+    image: string;
+  };
+  content: string;
+  createdAt: Date;
+  likes: number;
+  isLiked: boolean;
+  replies: CommentData[];
 };
 
 export async function generateStaticParams() {
@@ -34,30 +55,30 @@ export async function generateStaticParams() {
 async function findPostFileBySlug(slug: string): Promise<string | null> {
   const postsDir = path.join(process.cwd(), 'content/posts');
   const files = fs.readdirSync(postsDir);
-  
+
   // First try exact match with .md extension
   if (files.includes(`${slug}.md`)) {
     return `${slug}.md`;
   }
-  
+
   // Then try to match the slug against frontmatter
   for (const file of files) {
     const filePath = path.join(postsDir, file);
     const content = fs.readFileSync(filePath, 'utf-8');
     const { data } = matter(content);
-    
+
     if (data.slug === slug) {
       return file;
     }
   }
-  
+
   return null;
 }
 
 async function getPost(slug: string) {
   const fileName = await findPostFileBySlug(slug);
   if (!fileName) {
-    throw new Error(`Post with slug "${slug}" not found`);
+    return { data: null, contentHtml: null };
   }
 
   const filePath = path.join(process.cwd(), 'content/posts', fileName);
@@ -121,11 +142,11 @@ export default async function BlogPost({ params }: PostProps) {
   const slug = (await params).slug;
   const { data, contentHtml } = await getPost(slug);
   if (!data) {
-    return notFound();
+    notFound();
   }
   const comments = await getComments(slug);
 
-  const transformComment = (comment: any) => ({
+  const transformComment = (comment: Comment): CommentData => ({
     commentId: comment.id,
     author: {
       name: comment.user_id,
@@ -134,7 +155,7 @@ export default async function BlogPost({ params }: PostProps) {
     content: comment.content,
     createdAt: new Date(comment.created_at),
     likes: comment.likes,
-    isLiked: comment.comment_likes?.some((like: any) => like.user_id === 'guest'),
+    isLiked: comment.comment_likes?.some((like: Database['public']['Tables']['comment_likes']['Row']) => like.user_id === 'guest'),
     replies: comment.replies?.map(transformComment) || []
   });
 
@@ -190,7 +211,7 @@ export default async function BlogPost({ params }: PostProps) {
           }}
         />
         {comments.map((comment) => {
-          const transformedComment = transformComment(comment);
+          const transformedComment = transformComment(comment as Comment);
           return (
             <PostComment
               key={transformedComment.commentId}
@@ -198,7 +219,7 @@ export default async function BlogPost({ params }: PostProps) {
               onLike={async (commentId) => {
                 'use server';
                 const supabase = await createServerClient();
-                
+
                 // update comment likes count
                 const { error: updateError } = await supabase
                   .from('comments')
