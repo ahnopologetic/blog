@@ -139,8 +139,9 @@ async function getComments(slug: string) {
   return comments;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const { data } = await getPost(params.slug);
+export async function generateMetadata({ params }: PostProps): Promise<Metadata> {
+  const slug = (await params).slug;
+  const { data } = await getPost(slug);
   
   if (!data) {
     return {};
