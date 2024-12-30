@@ -1,5 +1,14 @@
+import { ShareMenu } from '@/components/ShareMenu';
+import PostComment from '@/components/post/post-comment';
+import PostCommentInput from '@/components/post/post-comment-input';
+import { PostReactions } from '@/components/post/post-reactions';
+import { Database } from '@/lib/database.types';
+import { createClient } from '@/utils/supabase/client';
+import { createClient as createServerClient } from '@/utils/supabase/server';
 import fs from 'fs';
 import matter from 'gray-matter';
+import { revalidatePath } from 'next/cache';
+import { notFound } from 'next/navigation';
 import path from 'path';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
@@ -9,15 +18,6 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
-import { ShareMenu } from '@/components/ShareMenu';
-import PostComment from '@/components/post/post-comment';
-import PostCommentInput from '@/components/post/post-comment-input';
-import { createClient } from '@/utils/supabase/client';
-import { createClient as createServerClient } from '@/utils/supabase/server';
-import { revalidatePath } from 'next/cache';
-import { notFound, redirect } from 'next/navigation';
-import { PostReactions } from '@/components/post/post-reactions';
-import { Database } from '@/lib/database.types';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
