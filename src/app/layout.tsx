@@ -54,11 +54,11 @@ export const metadata: Metadata = {
     template: "%s | ahnopologetic Blog"
   },
   description: "IMHO, my worldview, and a few other things",
-  metadataBase: new URL('https://ahnopologetic.com'),
+  metadataBase: new URL('https://blog.ahnopologetic.xyz'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://ahnopologetic.com',
+    url: 'https://blog.ahnopologetic.xyz',
     siteName: 'ahnopologetic Blog',
     title: 'ahnopologetic Blog',
     description: 'IMHO, my worldview, and a few other things',
