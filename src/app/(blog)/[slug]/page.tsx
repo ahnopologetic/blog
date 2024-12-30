@@ -18,6 +18,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
+import { Metadata } from 'next';
 
 type PostProps = {
   params: Promise<{ slug: string }>;
@@ -136,6 +137,43 @@ async function getComments(slug: string) {
   }
 
   return comments;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { data } = await getPost(params.slug);
+  
+  if (!data) {
+    return {};
+  }
+
+  const ogImage = data.ogImage || data.coverImage || '/og-image.jpg';
+  const description = data.description || data.excerpt || 'Read this blog post on ahnopologetic Blog';
+
+  return {
+    title: data.title,
+    description,
+    openGraph: {
+      title: data.title,
+      description,
+      type: 'article',
+      publishedTime: data.date,
+      authors: ['ahnopologetic'],
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: data.title,
+      description,
+      images: [ogImage],
+    },
+  };
 }
 
 export default async function BlogPost({ params }: PostProps) {

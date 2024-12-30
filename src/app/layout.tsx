@@ -48,10 +48,47 @@ const Cheltenham = localFont({
   variable: '--font-cheltenham',
 });
 
-
 export const metadata: Metadata = {
-  title: "ahnopologetic Blog",
+  title: {
+    default: "ahnopologetic Blog",
+    template: "%s | ahnopologetic Blog"
+  },
   description: "IMHO, my worldview, and a few other things",
+  metadataBase: new URL('https://ahnopologetic.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://ahnopologetic.com',
+    siteName: 'ahnopologetic Blog',
+    title: 'ahnopologetic Blog',
+    description: 'IMHO, my worldview, and a few other things',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'ahnopologetic Blog'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ahnopologetic Blog',
+    description: 'IMHO, my worldview, and a few other things',
+    images: ['/og-image.jpg'],
+    creator: '@ahnopologetic'
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
