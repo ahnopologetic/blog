@@ -1,6 +1,7 @@
 ---
 title: Focusing on Problem-Solving Rather Than Code
 date: 2021-06-22
+slug: focus-on-problem-solving
 ---
 <aside>
 ⛔ The following article was originally written for internal use. I'm sharing it here as it may be meaningful to look back on later...

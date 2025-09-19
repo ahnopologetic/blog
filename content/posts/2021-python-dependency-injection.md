@@ -1,6 +1,7 @@
 ---
 title: Python Application Dependency Injection - dependency injector
 date: 2021-08-16
+slug: dip-with-dependency-injector
 ---
 
 
